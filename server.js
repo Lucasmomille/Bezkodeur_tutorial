@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-
+const initRoutes = require("./app/routes/tutorial.routes");
 const app = express();
 
 var corsOptions = {
@@ -9,6 +9,11 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+global.__basedir = __dirname + "/..";
+
+app.use(express.urlencoded({ extended: true }));
+initRoutes(app);
 
 const db = require("./app/models");
 db.sequelize.sync();
