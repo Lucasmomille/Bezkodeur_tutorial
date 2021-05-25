@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const initRoutes = require("./app/routes/tutorial.routes");
+
 const app = express();
 
 var corsOptions = {
@@ -10,20 +10,23 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-global.__basedir = __dirname + "/..";
+app.use(bodyParser.json());
+// parse requests of content-type - application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+//app.use(express.urlencoded({ extended: true }));
 
-app.use(express.urlencoded({ extended: true }));
-initRoutes(app);
 
 const db = require("./app/models");
-db.sequelize.sync();
+//db.sequelize.sync();
 
 
 /* For development , you may need to drop existing 
-tables and re-sync database. Just use force: true as following code
- db.sequelize.sync({ force: true }).then(() => {
+tables and re-sync database. Just use force: true as following code */
+db.sequelize.sync({ force: true }).then(() => {
     console.log("Drop and re-sync db.");
-  }); */
+});
 // simple route
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to bezkoder application." });
