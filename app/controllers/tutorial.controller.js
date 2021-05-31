@@ -1,14 +1,15 @@
 const db = require("../models");
 const Tutorial = db.tutorials;
+const Comment = db.comments;
+const Tag = db.tags;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Tutorial
 exports.create = (req, res) => {
-    // Validate request
     console.log(req.body);
     if (!req.body.title) {
         res.status(400).send({
-            message: "Content can not be empty!"
+            message: "Title can not be empty"
         });
         return;
     }
@@ -41,30 +42,57 @@ exports.findAll = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
-    Tutorial.findAll({ where: condition })
-        .then(data => {
-            res.send(data);
-        })
+    Tutorial.findAll({
+        where: condition,
+        include: [
+            {
+                model: Comment,
+                as: "comments"
+            },
+            {
+                model: Tag,
+                as: "tags",
+                attributes: ["id", "name"],
+                through: {
+                    attributes: [],
+                },
+            }
+        ],
+    }).then(data => {
+        res.send(data);
+    })
         .catch(err => {
             res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving tutorials."
+                message: err.message || "Some error occurred while retrieving tutorials."
             });
         });
 };
 
 // Find a single Tutorial with an id
-exports.findOne = (req, res) => {
+exports.findById = (req, res) => {
     const id = req.params.id;
 
-    Tutorial.findByPk(id)
-        .then(data => {
-            res.send(data);
+    Tutorial.findByPk(id, {
+        include: [
+            {
+                model: Comment,
+                as: "comments",
+            },
+            {
+                model: Tag,
+                as: "tags",
+                attributes: ["id", "name"],
+                through: {
+                    attributes: [],
+                }
+            }
+        ]
+    })
+        .then((tutorial) => {
+            res.send(tutorial);
         })
-        .catch(err => {
-            res.status(500).send({
-                message: "Error retrieving Tutorial with id=" + id
-            });
+        .catch((err) => {
+            console.log(">> Error while finding tutorial: ", err);
         });
 };
 
