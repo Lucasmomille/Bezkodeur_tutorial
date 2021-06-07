@@ -1,13 +1,13 @@
 const db = require('../models');
-const Tutorial = db.tutorials;
+//const Tutorial = db.tutorials;
 const Comment = db.comments;
 
-exports.create = (tutorialId, comment) => {
+exports.create = (req, res) => {
 
     Comment.create({
-        name: comment.name,
-        text: comment.text,
-        tutorialId: tutorialId,
+        name: req.body.name,
+        text: req.body.text,
+        tutorialId: req.body.tutorialId,
     }).then((comment) => {
         console.log(`>> Created Comment ${JSON.stringify(comment, null, 4)}`);
         res.send(comment);
@@ -19,7 +19,8 @@ exports.create = (tutorialId, comment) => {
     });
 }
 
-exports.findById = (id) => {
+exports.findById = (req, res) => {
+    const id = req.params.id;
     Comment.findByPk(id, { include: ["tutorial"] })
         .then((comment) => {
             res.send(comment);;
